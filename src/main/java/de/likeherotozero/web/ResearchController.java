@@ -56,7 +56,7 @@ public class ResearchController {
             validation.reject("save.conflict", "Der Wert konnte nicht gespeichert werden. Prüfe das Land und das Jahr.");
             return showWorkspace(model);
         }
-        return saved(redirect, form.getCountry(), "Der neue Jahreswert wurde gespeichert.");
+        return saved(redirect, form.getCountry(), form.getYear(), "Der neue Jahreswert wurde gespeichert.");
     }
 
     @GetMapping("/bearbeiten")
@@ -79,7 +79,7 @@ public class ResearchController {
         if (!validation.hasErrors()) {
             try {
                 if (service.correct(countryCode, year, form.getAmount(), form.getVersion())) {
-                    return saved(redirect, countryCode, "Die Korrektur wurde gespeichert.");
+                    return saved(redirect, countryCode, year, "Die Korrektur wurde gespeichert.");
                 }
                 return missing(redirect);
             } catch (OptimisticLockingFailureException conflict) {
@@ -95,14 +95,22 @@ public class ResearchController {
     }
 
     private String showWorkspace(Model model) {
-        model.addAttribute("countries", service.countries());
+        var countries = service.countries();
+        model.addAttribute("countries", countries);
+        if (model.getAttribute("savedCountry") instanceof String countryCode) {
+            countries.stream().filter(country -> country.getCode().equals(countryCode)).findFirst()
+                    .ifPresent(country -> model.addAttribute("savedCountryName", country.getDisplayName()));
+        }
         model.addAttribute("currentYear", Year.now().getValue());
         return "research";
     }
 
-    private String saved(RedirectAttributes redirect, String countryCode, String message) {
+    private String saved(RedirectAttributes redirect, String countryCode, int year, String message) {
+        redirect.addAttribute("land", countryCode);
+        redirect.addAttribute("jahr", year);
         redirect.addFlashAttribute("message", message);
         redirect.addFlashAttribute("savedCountry", countryCode);
+        redirect.addFlashAttribute("savedYear", year);
         return "redirect:/forschung";
     }
 
