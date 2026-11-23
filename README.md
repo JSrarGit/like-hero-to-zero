@@ -40,3 +40,22 @@ java -jar target/like-hero-to-zero-1.0.0.jar
 ```
 
 Die Tests verwenden eine kleine CSV und eine separate In-Memory-Datenbank. Sie prüfen den neuesten verfügbaren Jahreswert, das Filtern von Aggregaten, Anmeldung und Rolle, das Anlegen und Korrigieren sowie ungültige, doppelte und veraltete Eingaben.
+
+## Durchlauf mit der Original-CSV
+
+Verwende die Startanleitung oben mit einer neuen H2-Datei. Setze dazu vor dem Start `EMISSIONS_DB_URL`.
+
+```sh
+export EMISSIONS_DB_URL='jdbc:h2:file:./data/nachweis'
+```
+
+Der Erststart importiert 23.521 Jahreswerte für 216 Länder und Gebiete. Die Beträge zum Anlegen und Korrigieren in dieser Tabelle sind Demonstrationswerte in Mt CO₂.
+
+| Schritt | Erwartetes Ergebnis |
+| --- | --- |
+| Öffentlich Deutschland und Brasilien abrufen | Deutschland 2024 zeigt 572,319175. Brasilien 2024 zeigt 483,011562. |
+| Ohne Anmeldung `/forschung` öffnen | Die Anmeldeseite erscheint. |
+| Anmelden und im Anlegeformular nur Jahr und Betrag eingeben | Das Formular verlangt eine Länderwahl. |
+| Brasilien 2025 mit 471,234567 speichern | Die Bestätigung nennt Brasilien 2025. **Jüngsten Wert anzeigen** führt zum neuen Wert mit der Herkunft **Lokaler Beitrag**. |
+| Indien 2024 von 3.193,478015 auf 3.193,123456 korrigieren | Die Bestätigung nennt Indien 2024. Öffentlich erscheint der korrigierte Wert mit der Herkunft **Lokale Korrektur**. Werte bei der Eingabe ohne Tausendertrennzeichen schreiben. |
+| Anwendung beenden und mit derselben H2-Datei neu starten | Brasilien 2025 und Indien 2024 sind weiterhin mit den gespeicherten Werten und ihrer Herkunft abrufbar. |
