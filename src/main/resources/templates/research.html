@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Datenpflege')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar(true)}"></header>
+
+<main class="container">
+    <div class="page-intro">
+        <h1>Datenpflege</h1>
+        <p>Erfasse einen fossilen CO₂-Jahreswert in Mt CO₂ oder öffne einen bestehenden Wert zur Korrektur.</p>
+    </div>
+    <p class="notice success" role="status" th:if="${message}">
+        <span th:text="${message}"></span>
+        <a th:href="@{/(land=${savedCountry})}">Öffentlich anzeigen</a>
+    </p>
+    <p class="notice error" role="alert" th:if="${lookupError}" th:text="${lookupError}"></p>
+
+    <div class="research-grid">
+        <section class="panel" aria-labelledby="add-title">
+            <h2 id="add-title">Neuen Jahreswert erfassen</h2>
+            <form th:action="@{/forschung/emissionen}" th:object="${entry}" method="post">
+                <p class="notice error" role="alert" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+                <div class="fields">
+                    <div>
+                        <label for="country">Land oder Gebiet</label>
+                        <select th:field="*{country}" required th:attr="aria-invalid=${#fields.hasErrors('country')}">
+                            <option value="" disabled>Bitte auswählen</option>
+                            <option th:each="countryOption : ${countries}" th:value="${countryOption.code}"
+                                    th:text="${countryOption.displayName}"></option>
+                        </select>
+                        <p class="field-error" role="alert" th:errors="*{country}"></p>
+                    </div>
+                    <div class="numeric-fields">
+                        <div>
+                            <label for="year">Bezugsjahr</label>
+                            <input type="number" th:field="*{year}" min="1750" th:max="${currentYear}" required
+                                   th:attr="aria-invalid=${#fields.hasErrors('year')}">
+                            <p class="field-error" role="alert" th:errors="*{year}"></p>
+                        </div>
+                        <div>
+                            <label for="amount">Wert in Mt CO₂</label>
+                            <input type="number" th:field="*{amount}" inputmode="decimal" min="0" step="0.000001" required
+                                   th:attr="aria-invalid=${#fields.hasErrors('amount')}">
+                            <p class="field-error" role="alert" th:errors="*{amount}"></p>
+                        </div>
+                    </div>
+                </div>
+                <button class="primary" type="submit">Jahreswert speichern</button>
+            </form>
+        </section>
+
+        <section class="panel" aria-labelledby="edit-title">
+            <h2 id="edit-title">Bestehenden Wert öffnen</h2>
+            <form th:action="@{/forschung/bearbeiten}" method="get">
+                <div class="fields">
+                    <div>
+                        <label for="lookup-land">Land oder Gebiet</label>
+                        <select id="lookup-land" name="land" required>
+                            <option value="" disabled selected>Bitte auswählen</option>
+                            <option th:each="countryOption : ${countries}" th:value="${countryOption.code}"
+                                    th:text="${countryOption.displayName}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="lookup-year">Bezugsjahr</label>
+                        <input type="number" id="lookup-year" name="jahr" min="1750" th:max="${currentYear}" required>
+                    </div>
+                </div>
+                <button class="secondary" type="submit">Wert öffnen</button>
+            </form>
+        </section>
+    </div>
+</main>
+</body>
+</html>

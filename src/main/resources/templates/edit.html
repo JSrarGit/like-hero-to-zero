@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Wert korrigieren')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar(true)}"></header>
+
+<main class="container narrow">
+    <div class="page-intro">
+        <h1>Wert korrigieren</h1>
+        <p th:text="|${record.country.displayName} · ${record.year}|"></p>
+    </div>
+    <form class="panel" th:action="@{/forschung/emissionen/{code}/{year}(code=${record.country.code},year=${record.year})}"
+          th:object="${correction}" method="post">
+        <p class="data-origin"><strong>Bisherige Herkunft</strong><br><span th:text="${record.origin.label}"></span></p>
+        <p class="notice error" role="alert" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+        <input type="hidden" th:field="*{version}">
+        <p class="field-error" role="alert" th:errors="*{version}"></p>
+        <label for="amount">Korrigierter Wert in Mt CO₂</label>
+        <input type="number" th:field="*{amount}" inputmode="decimal" min="0" step="0.000001" required
+               th:attr="aria-invalid=${#fields.hasErrors('amount')}">
+        <p class="field-error" role="alert" th:errors="*{amount}"></p>
+        <div class="actions">
+            <button class="primary" type="submit">Korrektur speichern</button>
+            <a th:if="${#fields.hasGlobalErrors()}"
+               th:href="@{/forschung/bearbeiten(land=${record.country.code},jahr=${record.year})}">Aktuellen Stand öffnen</a>
+            <a th:href="@{/forschung}">Zur Datenpflege</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

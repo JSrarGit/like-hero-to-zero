@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Forschungslogin')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar(false)}"></header>
+
+<main class="container narrow">
+    <div class="page-intro">
+        <h1>Forschungslogin</h1>
+        <p>Melde dich mit deinem Forschungskonto an, um Jahreswerte zu pflegen.</p>
+    </div>
+    <form class="panel" method="post" th:action="@{/login}">
+        <p class="notice error" role="alert" th:if="${param.error}">Benutzername oder Passwort stimmt nicht.</p>
+        <div class="fields">
+            <div>
+                <label for="username">Benutzername</label>
+                <input id="username" name="username" autocomplete="username" required>
+            </div>
+            <div>
+                <label for="password">Passwort</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="primary" type="submit">Anmelden</button>
+            <a th:href="@{/}">Zur Länderabfrage</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

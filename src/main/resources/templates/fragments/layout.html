@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(pageTitle)">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="|${pageTitle} · Like Hero To Zero|">Like Hero To Zero</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="icon" href="data:,">
+</head>
+<body>
+<header class="topbar" th:fragment="topbar(signedIn)">
+    <div class="container topbar-inner">
+        <a class="brand" th:href="@{/}">Like Hero To Zero</a>
+        <nav aria-label="Hauptnavigation">
+            <a th:if="${signedIn}" th:href="@{/}">Länderabfrage</a>
+            <a class="nav-pill" th:unless="${signedIn}" th:href="@{/login}">Forschungslogin</a>
+            <a th:if="${signedIn}" th:href="@{/forschung}">Datenpflege</a>
+            <form th:if="${signedIn}" th:action="@{/logout}" method="post">
+                <button class="nav-pill" type="submit">Abmelden</button>
+            </form>
+        </nav>
+    </div>
+</header>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Länderabfrage')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar(${signedIn})}"></header>
+
+<main class="container">
+    <div class="page-intro">
+        <h1>CO₂-Emissionen nach Land</h1>
+        <p>Wähle ein Land oder Gebiet, um den jüngsten verfügbaren Jahreswert für fossile CO₂-Emissionen zu sehen.</p>
+    </div>
+    <p class="notice success" role="status" th:if="${param.abgemeldet}">Du bist abgemeldet.</p>
+
+    <div class="public-grid">
+        <section class="panel" aria-labelledby="choose-title">
+            <h2 id="choose-title">Land auswählen</h2>
+            <form method="get" th:action="@{/}">
+                <label for="land">Land oder Gebiet</label>
+                <select id="land" name="land" required>
+                    <option value="" disabled th:selected="${selected == null}">Bitte auswählen</option>
+                    <option th:each="country : ${countries}" th:value="${country.code}"
+                            th:text="${country.displayName}" th:selected="${selected != null and country.code == selected.code}"></option>
+                </select>
+                <button class="primary" type="submit">Wert anzeigen</button>
+            </form>
+        </section>
+
+        <section class="result" aria-label="Jüngster verfügbarer CO₂-Wert" aria-live="polite">
+            <th:block th:if="${latest != null}">
+                <h2 th:text="${selected.displayName}">Deutschland</h2>
+                <p class="measure"><strong th:text="${formattedAmount}">572,319175</strong> <span>Mt CO₂</span></p>
+                <dl>
+                    <div><dt>Bezugsjahr</dt><dd th:text="${latest.year}">2024</dd></div>
+                    <div><dt>Datenherkunft</dt><dd th:text="${latest.origin.label}">Global Carbon Project</dd></div>
+                </dl>
+            </th:block>
+            <th:block th:if="${latest == null}">
+                <h2>Kein Jahreswert</h2>
+                <p th:if="${unknownCountry}">Wähle ein Land oder Gebiet aus der Liste.</p>
+                <p th:unless="${unknownCountry}">Für diese Auswahl liegt kein gespeicherter Wert vor.</p>
+            </th:block>
+        </section>
+    </div>
+    <p class="source-note"><a href="https://doi.org/10.5281/zenodo.17417124">Datengrundlage des Global Carbon Project</a>
+        <span> · Mt CO₂ steht für Millionen Tonnen Kohlendioxid.</span></p>
+</main>
+</body>
+</html>
