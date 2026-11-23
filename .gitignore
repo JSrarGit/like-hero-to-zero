@@ -1,0 +1,8 @@
+/target/
+/data/
+/.local/
+/.idea/
+/.vscode/
+/.DS_Store
+/.env
+*.log
