@@ -11,7 +11,8 @@
     </div>
     <p class="notice success" role="status" th:if="${message}">
         <span th:text="${message}"></span>
-        <a th:href="@{/(land=${savedCountry})}">Öffentlich anzeigen</a>
+        <strong th:text="|${savedCountryName} · ${savedYear}|"></strong>
+        <a th:href="@{/(land=${savedCountry})}">Jüngsten Wert anzeigen</a>
     </p>
     <p class="notice error" role="alert" th:if="${lookupError}" th:text="${lookupError}"></p>
 
@@ -24,7 +25,7 @@
                     <div>
                         <label for="country">Land oder Gebiet</label>
                         <select th:field="*{country}" required th:attr="aria-invalid=${#fields.hasErrors('country')}">
-                            <option value="" disabled>Bitte auswählen</option>
+                            <option value="">Bitte auswählen</option>
                             <option th:each="countryOption : ${countries}" th:value="${countryOption.code}"
                                     th:text="${countryOption.displayName}"></option>
                         </select>
