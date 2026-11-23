@@ -79,11 +79,28 @@ class EmissionWorkflowTest {
 
     @Test
     @WithMockUser(roles = "SCIENTIST")
-    void savesNewDataAndShowsItInThePublicView() throws Exception {
-        mvc.perform(get("/forschung")).andExpect(status().isOk());
+    void requiresAnExplicitCountryForNewData() throws Exception {
+        mvc.perform(get("/forschung"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<option value=\"\">Bitte auswählen</option>")));
+        var initialCount = emissions.count();
         mvc.perform(post("/forschung/emissionen").with(csrf())
+                        .param("country", "").param("year", "2025").param("amount", "8.234567"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeHasFieldErrors("entry", "country"));
+        assertThat(emissions.count()).isEqualTo(initialCount);
+    }
+
+    @Test
+    @WithMockUser(roles = "SCIENTIST")
+    void savesNewDataAndShowsItInThePublicView() throws Exception {
+        var saved = mvc.perform(post("/forschung/emissionen").with(csrf())
                         .param("country", "AFG").param("year", "2025").param("amount", "8.234567"))
-                .andExpect(redirectedUrl("/forschung"));
+                .andExpect(redirectedUrl("/forschung?land=AFG&jahr=2025"))
+                .andReturn();
+        mvc.perform(get(saved.getResponse().getRedirectedUrl()).flashAttrs(saved.getFlashMap()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Afghanistan · 2025")));
         mvc.perform(get("/").param("land", "AFG"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("8,234567")))
@@ -100,7 +117,8 @@ class EmissionWorkflowTest {
         mvc.perform(post("/forschung/emissionen").with(csrf())
                         .param("country", "DEU").param("year", "2025").param("amount", "-1.0"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeHasFieldErrors("entry", "amount"));
+                .andExpect(model().attributeHasFieldErrors("entry", "amount"))
+                .andExpect(content().string(containsString("value=\"DEU\" selected=\"selected\"")));
         assertThat(emissions.findByCountry_CodeAndYear("DEU", 2024).orElseThrow().getAmount())
                 .isEqualByComparingTo("572.319175");
         assertThat(emissions.findByCountry_CodeAndYear("DEU", 2025)).isEmpty();
@@ -113,9 +131,17 @@ class EmissionWorkflowTest {
         mvc.perform(get("/forschung/bearbeiten").param("land", "DEU").param("jahr", "2019"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Korrektur speichern")));
-        mvc.perform(post("/forschung/emissionen/DEU/2019").with(csrf())
+        var saved = mvc.perform(post("/forschung/emissionen/DEU/2019").with(csrf())
                         .param("amount", "699.125").param("version", original.getVersion().toString()))
-                .andExpect(redirectedUrl("/forschung"));
+                .andExpect(redirectedUrl("/forschung?land=DEU&jahr=2019"))
+                .andReturn();
+        mvc.perform(get(saved.getResponse().getRedirectedUrl()).flashAttrs(saved.getFlashMap()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Deutschland · 2019")))
+                .andExpect(content().string(containsString("href=\"/?land=DEU\">Jüngsten Wert anzeigen</a>")));
+        mvc.perform(get("/").param("land", "DEU"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<dd>2024</dd>")));
         mvc.perform(post("/forschung/emissionen/DEU/2019").with(csrf())
                         .param("amount", "900.00").param("version", original.getVersion().toString()))
                 .andExpect(status().isOk())
